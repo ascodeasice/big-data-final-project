@@ -22,6 +22,7 @@ const App = () => (
         <Route path="/game">
           <Game />
         </Route>
+        {/* TODO: others, history */}
         {/* Default route in a switch */}
         <Route>404: No such page!</Route>
       </Switch>
