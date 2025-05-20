@@ -1,5 +1,4 @@
 import { Flex, Heading, Box, Button } from "@chakra-ui/react";
-import React from "react";
 import { Link } from "wouter";
 
 const Navbar = () => {

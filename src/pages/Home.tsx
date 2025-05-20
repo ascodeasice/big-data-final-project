@@ -6,7 +6,7 @@ const Home = () => {
   return (
     <Center minH="100vh">
       <Stack spaceY={6} align={"center"}>
-        <Heading size="4xl">韭菜傳奇</Heading>
+        <Heading size="6xl">韭菜傳奇</Heading>
         <Link to="/game">
           <Button colorPalette={"teal"}>開始遊戲</Button>
         </Link>

@@ -1,33 +1,22 @@
 import { Route, Switch } from "wouter";
 import Home from "./pages/Home";
 import Game from "./pages/Game";
-import { ChakraProvider, defaultSystem, defineConfig } from "@chakra-ui/react";
-import { ThemeProvider } from "@emotion/react";
-
-const config = defineConfig({
-  theme: {
-    tokens: {
-      colors: {},
-    },
-  },
-});
+import { Provider } from "@/components/ui/provider";
 
 const App = () => (
-  <ChakraProvider value={defaultSystem}>
-    <ThemeProvider theme={config}>
-      <Switch>
-        <Route path="/">
-          <Home />
-        </Route>
-        <Route path="/game">
-          <Game />
-        </Route>
-        {/* TODO: others, history */}
-        {/* Default route in a switch */}
-        <Route>404: No such page!</Route>
-      </Switch>
-    </ThemeProvider>
-  </ChakraProvider>
+  <Provider>
+    <Switch>
+      <Route path="/">
+        <Home />
+      </Route>
+      <Route path="/game">
+        <Game />
+      </Route>
+      {/* TODO: others, history */}
+      {/* Default route in a switch */}
+      <Route>404: No such page!</Route>
+    </Switch>
+  </Provider>
 );
 
 export default App;
