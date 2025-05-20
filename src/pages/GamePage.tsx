@@ -1,7 +1,7 @@
 import Navbar from "@/components/Navbar";
 import { Grid } from "@chakra-ui/react";
 
-const Game = () => {
+const GamePage = () => {
   return (
     <Grid minH={"100vh"} templateRows={"1fr 5fr"}>
       <Navbar/>
@@ -9,4 +9,4 @@ const Game = () => {
   );
 };
 
-export default Game;
+export default GamePage;

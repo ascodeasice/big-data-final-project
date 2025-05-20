@@ -1,16 +1,16 @@
 import { Route, Switch } from "wouter";
-import Home from "./pages/Home";
-import Game from "./pages/Game";
+import HomePage from "./pages/HomePage";
+import GamePage from "./pages/GamePage";
 import { Provider } from "@/components/ui/provider";
 
 const App = () => (
   <Provider forcedTheme="light">
     <Switch>
       <Route path="/">
-        <Home />
+        <HomePage />
       </Route>
       <Route path="/game">
-        <Game />
+        <GamePage />
       </Route>
       {/* TODO: others, history */}
       {/* Default route in a switch */}

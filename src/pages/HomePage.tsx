@@ -1,7 +1,7 @@
 import { Button, Center, Heading, Stack } from "@chakra-ui/react";
 import { Link } from "wouter";
 
-const Home = () => {
+const HomePage = () => {
   // TODO: add more decoration
   return (
     <Center minH="100vh">
@@ -15,4 +15,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default HomePage;
