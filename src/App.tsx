@@ -4,7 +4,7 @@ import Game from "./pages/Game";
 import { Provider } from "@/components/ui/provider";
 
 const App = () => (
-  <Provider>
+  <Provider forcedTheme="light">
     <Switch>
       <Route path="/">
         <Home />
