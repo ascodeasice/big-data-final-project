@@ -12,7 +12,7 @@ const Navbar = () => {
     >
       {/* TODO: maybe icon? */}
       <Link to="/game">
-        <Heading color={"white"} size="2xl">
+        <Heading color={"white"} size="3xl">
           韭菜傳奇
         </Heading>
       </Link>
