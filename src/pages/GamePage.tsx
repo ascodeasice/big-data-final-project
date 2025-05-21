@@ -38,6 +38,20 @@ const GamePage = () => {
     }
   };
 
+  const getNewBalance = () => {
+    switch (action) {
+      case "":
+        return balance;
+      case "buy":
+        return balance - stockCost;
+      case "sell":
+        return balance + stockCost;
+      default:
+        console.warn("Invalid action");
+        return balance;
+    }
+  };
+
   return (
     <Grid
       minH={"100vh"}
@@ -106,10 +120,13 @@ const GamePage = () => {
             </Text>
           </Flex>
           {/* TODO: use add when selling */}
-          <Text>新餘額：{formatCurrency(balance - stockCost)}</Text>
+          <Text>新餘額：{formatCurrency(getNewBalance())}</Text>
           <ButtonGroup>
+            {/* TODO: button features */}
             <Button colorPalette={"teal"}>加入投資組合</Button>
-            <Button colorPalette={"gray"} variant={'surface'}>重設</Button>
+            <Button colorPalette={"gray"} variant={"surface"}>
+              重設
+            </Button>
           </ButtonGroup>
         </Flex>
       </Flex>
