@@ -45,17 +45,23 @@ const GamePage = () => {
 
   const getMaxStockCount = (): number => {
     const DEFAULT_MAX_STOCK_COUNT = 1_000_000;
-    if (action != "sell") {
+    if (action != "sell" && action != "buy") {
       return DEFAULT_MAX_STOCK_COUNT;
     }
 
+    if (action == "buy") {
+      if (selectedStockPrice == 0) {
+        return DEFAULT_MAX_STOCK_COUNT;
+      }
+      return Math.floor(getNewBalance() / selectedStockPrice);
+    }
     const portItem = portfolio.find((item) => item.stockId == selectedStockId);
     const holding = holdings.find(
       (item) => item.stockId.toString() == selectedStockId,
     );
 
     if (portItem || holding) {
-      return portItem?.count ?? 0 + (holding?.count ?? 0);
+      return (portItem?.count ?? 0) + (holding?.count ?? 0);
     }
 
     return DEFAULT_MAX_STOCK_COUNT;
@@ -169,6 +175,26 @@ const GamePage = () => {
       return;
     }
 
+    if (action == "buy" && selectedStockPrice * stockCount > getNewBalance()) {
+      toaster.create({
+        title: "餘額不足",
+        type: "warning",
+      });
+      return;
+    }
+
+    const portItem = portfolio.find((item) => item.stockId == selectedStockId);
+    const holding = holdings.find(
+      (h) => h.stockId.toString() == selectedStockId,
+    );
+    const ownedStockCount = (portItem?.count ?? 0) + (holding?.count ?? 0);
+    if (action == "sell" && stockCount > ownedStockCount) {
+      toaster.create({
+        title: "持有的股票不足",
+        type: "warning",
+      });
+      return;
+    }
     setPortfolio((prev) =>
       prev.map((item) => {
         let newCount = item.count;
