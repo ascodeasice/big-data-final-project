@@ -43,6 +43,14 @@ const GamePage = () => {
     Math.round((selectedStock?.price ?? 0) * 100) / 100; // only takes two digits
   const stockCost = isNaN(stockCount) ? 0 : stockCount * selectedStockPrice;
 
+  const holdingsWorth = holdings.reduce((worth: number, h: Holding) => {
+    const stock = stocks.find((s) => h.stockId == s.id);
+    if (!stock) {
+      console.warn(`holdings in stock not found: ${h.stockId}`);
+    }
+    return worth + h.count * (stock?.price ?? 0);
+  }, 0);
+
   const getMaxStockCount = (): number => {
     const DEFAULT_MAX_STOCK_COUNT = 1_000_000;
     if (action != "sell" && action != "buy") {
@@ -270,7 +278,7 @@ const GamePage = () => {
             {/* TODO: update day count */}
             <Heading>第 {day} 天</Heading>
             <Heading>現金餘額：{formatCurrency(balance)}</Heading>
-            <Heading>股票估值：{formatCurrency(0)}</Heading>
+            <Heading>股票估值：{formatCurrency(holdingsWorth)}</Heading>
           </Flex>
           <Flex direction="column" width={"fit-content"} gap={6}>
             <Field label="商品">
