@@ -346,7 +346,7 @@ const GamePage = () => {
                 variant={"surface"}
                 onClick={resetPortfolio}
               >
-                重設
+                重置投資組合
               </Button>
             </ButtonGroup>
           </Flex>
