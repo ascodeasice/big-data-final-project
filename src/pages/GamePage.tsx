@@ -1,6 +1,7 @@
 import Navbar from "@/components/Navbar";
 import { Field } from "@/components/ui/field";
 import { formatCurrency } from "@/functions/currency";
+import { type Stock, type APIResponse } from "@/types/stockTypes";
 import {
   Button,
   ButtonGroup,
@@ -12,18 +13,23 @@ import {
   NumberInput,
   Text,
 } from "@chakra-ui/react";
-import { useState } from "react";
+import camelcaseKeys from "camelcase-keys";
+import { useEffect, useState } from "react";
 
 type ActionType = "" | "buy" | "sell";
 
 const GamePage = () => {
-  const [balance] = useState(1_000_000);
+  const [balance, setBalance] = useState(1_000_000);
   const [action, setAction] = useState<ActionType>("");
   const [bgGradient, setBgGradient] = useState<[string, string]>(["", ""]); // gradient from, to
   const [day] = useState<number>(1);
   const [stockCount, setStockCount] = useState<number>(10);
-  const [selectedStockPrice] = useState<number>(1000);
+  const [selectedStockId, setSelectedStockId] = useState<string>("");
+  const [stocks, setStocks] = useState<Stock[]>([]);
 
+  const selectedStock = stocks.find((s) => s.id.toString() == selectedStockId);
+  const selectedStockPrice =
+    Math.round((selectedStock?.price ?? 0) * 100) / 100; // only takes two digits
   const stockCost = isNaN(stockCount) ? 0 : stockCount * selectedStockPrice;
 
   const onClickActionButton = (newAction: ActionType) => {
@@ -52,6 +58,37 @@ const GamePage = () => {
     }
   };
 
+  const fetchGameStatus = async () => {
+    // TODO: separate the case of start and advance since advance requires other parameters
+    const url = `${import.meta.env.VITE_BACKEND_URL}/${day == 1 ? "start" : `/advance/day`}`;
+    try {
+      const res = await fetch(url);
+      if (!res.ok) {
+        throw new Error("Failed to fetch histories");
+      }
+      // deep must be used for userName inside histories
+      const data: APIResponse = camelcaseKeys(await res.json(), { deep: true });
+
+      // update history status
+      const myHistory = data.histories.find((h) => h.userName == "player");
+      if (!myHistory) {
+        console.warn("My history not found");
+      } else {
+        setBalance(myHistory.cash);
+        // TODO: set holdings
+      }
+      // TODO: update history of other players
+
+      setStocks(data.stocks);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchGameStatus();
+  }, []);
+
   return (
     <Grid
       minH={"100vh"}
@@ -73,11 +110,16 @@ const GamePage = () => {
         <Flex direction="column" width={"fit-content"} gap={6}>
           <Field label="商品">
             <NativeSelect.Root>
-              <NativeSelect.Field>
-                {/* TODO: use real options */}
-                <option value="1">2330 台積電</option>
-                <option value="2">2454 聯發科</option>
-                <option value="3">2317 鴻海（富士康）</option>
+              <NativeSelect.Field
+                value={selectedStockId}
+                onChange={(e) => setSelectedStockId(e.target.value)}
+              >
+                <option value="">請選擇商品</option>
+                {stocks.map((s) => (
+                  <option key={s.id} value={s.id.toString()}>
+                    {s.name}
+                  </option>
+                ))}
               </NativeSelect.Field>
               <NativeSelect.Indicator />
             </NativeSelect.Root>
