@@ -6,21 +6,16 @@ export type Stock = {
   price: number;
 };
 
+export type Holding = {
+  stockId: number;
+  stockName: string;
+  count: number;
+};
+
 export type History = {
   day: number;
   userName: string;
-  holdings: [
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-  ]; // 固定長度 10
+  holdings: Holding[];
   cash: number;
 };
 

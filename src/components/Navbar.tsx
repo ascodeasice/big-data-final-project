@@ -9,6 +9,7 @@ const Navbar = () => {
       align={"center"}
       justify={"space-between"}
       paddingX={6}
+      gridColumn={"1/-1"}
     >
       {/* TODO: maybe icon? */}
       <Link to="/game">

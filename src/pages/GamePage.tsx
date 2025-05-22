@@ -1,7 +1,11 @@
 import Navbar from "@/components/Navbar";
 import { Field } from "@/components/ui/field";
 import { formatCurrency } from "@/functions/currency";
-import { type Stock, type APIResponse } from "@/types/stockTypes";
+import {
+  type Stock,
+  type APIResponse,
+  type Holding,
+} from "@/types/stockTypes";
 import {
   Button,
   ButtonGroup,
@@ -11,6 +15,7 @@ import {
   InputGroup,
   NativeSelect,
   NumberInput,
+  Table,
   Text,
 } from "@chakra-ui/react";
 import camelcaseKeys from "camelcase-keys";
@@ -26,6 +31,7 @@ const GamePage = () => {
   const [stockCount, setStockCount] = useState<number>(10);
   const [selectedStockId, setSelectedStockId] = useState<string>("");
   const [stocks, setStocks] = useState<Stock[]>([]);
+  const [holdings, setHoldings] = useState<Holding[]>([]);
 
   const selectedStock = stocks.find((s) => s.id.toString() == selectedStockId);
   const selectedStockPrice =
@@ -75,7 +81,7 @@ const GamePage = () => {
         console.warn("My history not found");
       } else {
         setBalance(myHistory.cash);
-        // TODO: set holdings
+        setHoldings(myHistory.holdings);
       }
       // TODO: update history of other players
 
@@ -93,6 +99,7 @@ const GamePage = () => {
     <Grid
       minH={"100vh"}
       templateRows={"1fr 5fr"}
+      templateColumns={"2fr 1fr"}
       gapY={6}
       bgGradient={"to-br"}
       gradientFrom={bgGradient[0]}
@@ -171,6 +178,26 @@ const GamePage = () => {
             </Button>
           </ButtonGroup>
         </Flex>
+      </Flex>
+      <Flex direction={"column"}>
+        <Heading>持有股票</Heading>
+        {/* TODO: extract */}
+        <Table.Root interactive stickyHeader variant={"outline"}>
+          <Table.Header>
+            <Table.Row>
+              <Table.ColumnHeader>名稱</Table.ColumnHeader>
+              <Table.ColumnHeader>股數</Table.ColumnHeader>
+            </Table.Row>
+          </Table.Header>
+          <Table.Body>
+            {holdings.map((h) => (
+              <Table.Row key={h.stockId}>
+                <Table.Cell>{h.stockName}</Table.Cell>
+                <Table.Cell>{h.count}</Table.Cell>
+              </Table.Row>
+            ))}
+          </Table.Body>
+        </Table.Root>
       </Flex>
     </Grid>
   );
