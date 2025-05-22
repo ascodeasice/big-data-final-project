@@ -75,12 +75,16 @@ const GamePage = () => {
         console.warn("My history not found");
       } else {
         setBalance(myHistory.cash);
-        setHoldings(myHistory.holdings);
+        setHoldings(
+          myHistory.holdings.sort((a, b) =>
+            a.stockName.localeCompare(b.stockName),
+          ),
+        );
       }
       // TODO: update history of other players
 
       // SECTION: stocks related info
-      setStocks(data.stocks);
+      setStocks(data.stocks.sort((a, b) => a.name.localeCompare(b.name)));
 
       // init portfolio
       setPortfolio(
