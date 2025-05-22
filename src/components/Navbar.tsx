@@ -25,12 +25,12 @@ const Navbar = () => {
         </Link>
 
         <Link to="/history">
-          <Button variant="plain" color="white">
+          <Button variant="plain" color="white" disabled>
             投資歷史
           </Button>
         </Link>
         <Link to="/others">
-          <Button variant="plain" color="white">
+          <Button variant="plain" color="white" disabled>
             其他玩家
           </Button>
         </Link>
