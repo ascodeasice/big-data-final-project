@@ -43,18 +43,58 @@ const GamePage = () => {
     Math.round((selectedStock?.price ?? 0) * 100) / 100; // only takes two digits
   const stockCost = isNaN(stockCount) ? 0 : stockCount * selectedStockPrice;
 
-  // TODO: consider all portfolioToday
+  const getMaxStockCount = (): number => {
+    const DEFAULT_MAX_STOCK_COUNT = 1_000_000;
+    if (action != "sell") {
+      return DEFAULT_MAX_STOCK_COUNT;
+    }
+
+    const portItem = portfolio.find((item) => item.stockId == selectedStockId);
+    const holding = holdings.find(
+      (item) => item.stockId.toString() == selectedStockId,
+    );
+
+    if (portItem || holding) {
+      return portItem?.count ?? 0 + (holding?.count ?? 0);
+    }
+
+    return DEFAULT_MAX_STOCK_COUNT;
+  };
+
+  const getDefaultPortfolio = (stocks: Stock[]): PortfolioItem[] => {
+    return stocks.map((s) => ({
+      stockId: s.id.toString(),
+      count: 0,
+    }));
+  };
+
   const getNewBalance = () => {
+    // from portfolio
+    let newBalance = balance;
+    portfolio.forEach((p) => {
+      const stockPrice = stocks.find(
+        (s) => s.id.toString() == p.stockId,
+      )?.price;
+      if (!stockPrice) {
+        console.warn(`price of stock ${p.stockId} not found`);
+        return;
+      }
+      // because selling (negative count) result in adding money
+      newBalance -= p.count * stockPrice;
+    });
+
+    return newBalance;
+  };
+
+  const getBalanceAfterAction = () => {
+    const newBalance = getNewBalance();
     switch (action) {
       case "":
-        return balance;
+        return newBalance;
       case "buy":
-        return balance - stockCost;
+        return newBalance - stockCost;
       case "sell":
-        return balance + stockCost;
-      default:
-        console.warn("Invalid action");
-        return balance;
+        return newBalance + stockCost;
     }
   };
 
@@ -84,24 +124,23 @@ const GamePage = () => {
       // TODO: update history of other players
 
       // SECTION: stocks related info
-      setStocks(data.stocks.sort((a, b) => a.name.localeCompare(b.name)));
+      const sortedStocks = data.stocks.sort((a, b) =>
+        a.name.localeCompare(b.name),
+      );
+      setStocks(sortedStocks);
 
       // init portfolio
-      setPortfolio(
-        data.stocks.map((s) => ({
-          stockId: s.id.toString(),
-          count: 0,
-        })),
-      );
+      setPortfolio(getDefaultPortfolio(sortedStocks));
     } catch (error) {
       console.error(error);
     }
   };
 
-  const resetForm = () => {
+  const resetPortfolio = () => {
     setSelectedStockId("");
     setAction("");
     setStockCount(DEFAULT_STOCK_COUNT);
+    setPortfolio(getDefaultPortfolio(stocks));
   };
 
   const addToPortfolio = () => {
@@ -130,8 +169,6 @@ const GamePage = () => {
       return;
     }
 
-    // TODO: other validations like can't sell over owned count (maybe in select?)
-
     setPortfolio((prev) =>
       prev.map((item) => {
         let newCount = item.count;
@@ -148,13 +185,13 @@ const GamePage = () => {
               break;
           }
         }
+        setAction("");
         return {
           ...item,
           count: newCount,
         };
       }),
     );
-    resetForm();
   };
 
   const getPortfolioText = (stockId: string) => {
@@ -207,7 +244,6 @@ const GamePage = () => {
             {/* TODO: update day count */}
             <Heading>第 {day} 天</Heading>
             <Heading>現金餘額：{formatCurrency(balance)}</Heading>
-            {/* TODO: calculate the worth of stocks */}
             <Heading>股票估值：{formatCurrency(0)}</Heading>
           </Flex>
           <Flex direction="column" width={"fit-content"} gap={6}>
@@ -244,19 +280,18 @@ const GamePage = () => {
               </Button>
             </ButtonGroup>
             <Flex align={"center"} gap={3}>
-              {/* TODO: set max to stock owning when selling */}
               <NumberInput.Root
                 value={stockCount.toString()}
                 onValueChange={(e) =>
                   setStockCount(isNaN(e.valueAsNumber) ? 0 : e.valueAsNumber)
                 }
-                min={0}
+                min={1}
+                max={getMaxStockCount()}
               >
                 <InputGroup endAddon="股">
                   <NumberInput.Input />
                 </InputGroup>
               </NumberInput.Root>
-              {/* TODO: use price of the selected stock */}
               <Text whiteSpace={"nowrap"}>
                 {" × "}
                 {formatCurrency(selectedStockPrice)}
@@ -264,17 +299,18 @@ const GamePage = () => {
                 {formatCurrency(stockCost)}
               </Text>
             </Flex>
-            {/* TODO: use add when selling */}
-            <Text>新餘額：{formatCurrency(getNewBalance())}</Text>
+            <Text>投資組合餘額：{formatCurrency(getNewBalance())}</Text>
+            <Text>
+              新增操作後餘額：{formatCurrency(getBalanceAfterAction())}
+            </Text>
             <ButtonGroup>
-              {/* TODO: button features */}
               <Button colorPalette={"teal"} onClick={addToPortfolio}>
                 加入投資組合
               </Button>
               <Button
                 colorPalette={"gray"}
                 variant={"surface"}
-                onClick={resetForm}
+                onClick={resetPortfolio}
               >
                 重設
               </Button>
@@ -283,7 +319,7 @@ const GamePage = () => {
         </Flex>
         <Flex direction={"column"}>
           <Heading>持有股票</Heading>
-          {/* TODO: extract */}
+          {/* TODO: extract into component */}
           <Table.Root interactive stickyHeader variant={"outline"}>
             <Table.Header>
               <Table.Row>
