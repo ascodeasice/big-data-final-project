@@ -14,9 +14,6 @@ const App = () => (
       <Route path="/game">
         <GamePage />
       </Route>
-      <Route path="/history">
-        <HistoryPage />
-      </Route>
       <Route path="/result">
         <ResultPage/>
       </Route>

@@ -24,6 +24,7 @@ import { Toaster, toaster } from "@/components/ui/toaster";
 import { useHistory, type HistoryStore } from "@/stores/historyStore";
 import { useLocation } from "wouter";
 import HoldingList from "./HoldingList";
+import HistoryPage from "../HistoryPage/HistoryPage";
 
 type ActionType = "" | "buy" | "sell";
 
@@ -39,6 +40,8 @@ const GamePage = () => {
   const [stocks, setStocks] = useState<Stock[]>([]);
   const [holdings, setHoldings] = useState<Holding[]>([]);
   const [portfolio, setPortfolio] = useState<PortfolioItem[]>([]);
+  const [tabIndex, setTabIndex] = useState(0);
+
   const { pushHistories } = useHistory();
 
   const [, navigate] = useLocation();
@@ -294,6 +297,7 @@ const GamePage = () => {
     }
   }, [action]);
 
+  // NOTE: using a tab system to prevent re-rendering, losing game info
   return (
     <>
       <Grid
@@ -305,94 +309,102 @@ const GamePage = () => {
         gradientFrom={bgGradient[0]}
         gradientTo={bgGradient[1]}
       >
-        <Navbar />
-        <Flex paddingX={6} gap={6} direction={"column"}>
-          <Flex gap={6}>
-            <Heading>第 {day} 天</Heading>
-            <Heading>現金餘額：{formatCurrency(balance)}</Heading>
-            <Heading>股票估值：{formatCurrency(holdingsWorth)}</Heading>
-          </Flex>
-          <Flex direction="column" width={"fit-content"} gap={6}>
-            <Field label="商品">
-              <NativeSelect.Root>
-                <NativeSelect.Field
-                  value={selectedStockId}
-                  onChange={(e) => setSelectedStockId(e.target.value)}
-                >
-                  <option value="">請選擇商品</option>
-                  {stocks.map((s) => (
-                    <option key={s.id} value={s.id.toString()}>
-                      {s.name}
-                    </option>
-                  ))}
-                </NativeSelect.Field>
-                <NativeSelect.Indicator />
-              </NativeSelect.Root>
-            </Field>
-            <ButtonGroup size="lg" attached>
-              <Button
-                colorPalette={"green"}
-                disabled={action == "buy"}
-                onClick={() => setAction("buy")}
-              >
-                買
-              </Button>
-              <Button
-                colorPalette={"red"}
-                disabled={action == "sell"}
-                onClick={() => setAction("sell")}
-              >
-                賣
-              </Button>
-            </ButtonGroup>
-            <Flex align={"center"} gap={3}>
-              <NumberInput.Root
-                value={stockCount.toString()}
-                onValueChange={(e) =>
-                  setStockCount(isNaN(e.valueAsNumber) ? 0 : e.valueAsNumber)
-                }
-                min={1}
-                max={getMaxStockCount()}
-              >
-                <InputGroup endAddon="股">
-                  <NumberInput.Input />
-                </InputGroup>
-              </NumberInput.Root>
-              <Text whiteSpace={"nowrap"}>
-                {" × "}
-                {formatCurrency(selectedStockPrice)}
-                {" = "}
-                {formatCurrency(stockCost)}
-              </Text>
+        <Navbar setTabIndex={setTabIndex} />
+        {tabIndex == 0 ? (
+          <>
+            <Flex paddingX={6} gap={6} direction={"column"}>
+              <Flex gap={6}>
+                <Heading>第 {day} 天</Heading>
+                <Heading>現金餘額：{formatCurrency(balance)}</Heading>
+                <Heading>股票估值：{formatCurrency(holdingsWorth)}</Heading>
+              </Flex>
+              <Flex direction="column" width={"fit-content"} gap={6}>
+                <Field label="商品">
+                  <NativeSelect.Root>
+                    <NativeSelect.Field
+                      value={selectedStockId}
+                      onChange={(e) => setSelectedStockId(e.target.value)}
+                    >
+                      <option value="">請選擇商品</option>
+                      {stocks.map((s) => (
+                        <option key={s.id} value={s.id.toString()}>
+                          {s.name}
+                        </option>
+                      ))}
+                    </NativeSelect.Field>
+                    <NativeSelect.Indicator />
+                  </NativeSelect.Root>
+                </Field>
+                <ButtonGroup size="lg" attached>
+                  <Button
+                    colorPalette={"green"}
+                    disabled={action == "buy"}
+                    onClick={() => setAction("buy")}
+                  >
+                    買
+                  </Button>
+                  <Button
+                    colorPalette={"red"}
+                    disabled={action == "sell"}
+                    onClick={() => setAction("sell")}
+                  >
+                    賣
+                  </Button>
+                </ButtonGroup>
+                <Flex align={"center"} gap={3}>
+                  <NumberInput.Root
+                    value={stockCount.toString()}
+                    onValueChange={(e) =>
+                      setStockCount(
+                        isNaN(e.valueAsNumber) ? 0 : e.valueAsNumber,
+                      )
+                    }
+                    min={1}
+                    max={getMaxStockCount()}
+                  >
+                    <InputGroup endAddon="股">
+                      <NumberInput.Input />
+                    </InputGroup>
+                  </NumberInput.Root>
+                  <Text whiteSpace={"nowrap"}>
+                    {" × "}
+                    {formatCurrency(selectedStockPrice)}
+                    {" = "}
+                    {formatCurrency(stockCost)}
+                  </Text>
+                </Flex>
+                <Text>投資組合餘額：{formatCurrency(getNewBalance())}</Text>
+                <Text>
+                  新增操作後餘額：{formatCurrency(getBalanceAfterAction())}
+                </Text>
+                <ButtonGroup>
+                  <Button colorPalette={"teal"} onClick={addToPortfolio}>
+                    加入投資組合
+                  </Button>
+                  <Button
+                    colorPalette={"gray"}
+                    variant={"surface"}
+                    onClick={resetPortfolio}
+                  >
+                    重置投資組合
+                  </Button>
+                </ButtonGroup>
+                <ButtonGroup>
+                  <Button
+                    colorPalette={"green"}
+                    variant={"subtle"}
+                    onClick={advanceDay}
+                  >
+                    {day == 30 ? "查看結果" : "進入下一天"}
+                  </Button>
+                </ButtonGroup>
+              </Flex>
             </Flex>
-            <Text>投資組合餘額：{formatCurrency(getNewBalance())}</Text>
-            <Text>
-              新增操作後餘額：{formatCurrency(getBalanceAfterAction())}
-            </Text>
-            <ButtonGroup>
-              <Button colorPalette={"teal"} onClick={addToPortfolio}>
-                加入投資組合
-              </Button>
-              <Button
-                colorPalette={"gray"}
-                variant={"surface"}
-                onClick={resetPortfolio}
-              >
-                重置投資組合
-              </Button>
-            </ButtonGroup>
-            <ButtonGroup>
-              <Button
-                colorPalette={"green"}
-                variant={"subtle"}
-                onClick={advanceDay}
-              >
-                {day == 30 ? "查看結果" : "進入下一天"}
-              </Button>
-            </ButtonGroup>
-          </Flex>
-        </Flex>
-        <HoldingList holdings={holdings} portfolio={portfolio} />
+            <HoldingList holdings={holdings} portfolio={portfolio} />
+          </>
+        ) : (
+          <HistoryPage/>
+        )}
       </Grid>
       <Toaster />
     </>

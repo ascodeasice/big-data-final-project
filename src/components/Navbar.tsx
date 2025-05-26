@@ -1,7 +1,13 @@
 import { Flex, Heading, Box, Button } from "@chakra-ui/react";
+import type React from "react";
 import { Link } from "wouter";
 
-const Navbar = ({ hideLinks = false }) => {
+type Props = {
+  setTabIndex?: React.Dispatch<React.SetStateAction<number>>;
+  hideLinks?: boolean;
+};
+
+const Navbar = ({ setTabIndex = () => {}, hideLinks = false }: Props) => {
   return (
     <Flex
       spaceX={12}
@@ -18,22 +24,15 @@ const Navbar = ({ hideLinks = false }) => {
         </Heading>
       </Link>
       <Box hidden={hideLinks}>
-        <Link to="/game">
-          <Button variant="plain" color="white">
-            當日投資
-          </Button>
-        </Link>
-
-        <Link to="/history">
-          <Button variant="plain" color="white">
-            投資歷史
-          </Button>
-        </Link>
-        <Link to="/others">
-          <Button variant="plain" color="white" disabled>
-            其他玩家
-          </Button>
-        </Link>
+        <Button variant="plain" color="white" onClick={() => setTabIndex(0)}>
+          當日投資
+        </Button>
+        <Button variant="plain" color="white" onClick={() => setTabIndex(1)}>
+          投資歷史
+        </Button>
+        <Button variant="plain" color="white" onClick={() => setTabIndex(2)}>
+          其他玩家
+        </Button>
       </Box>
     </Flex>
   );
