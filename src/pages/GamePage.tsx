@@ -18,6 +18,7 @@ import camelcaseKeys from "camelcase-keys";
 import { useCallback, useEffect, useState } from "react";
 import { Toaster, toaster } from "@/components/ui/toaster";
 import { useHistory, type HistoryStore } from "@/stores/historyStore";
+import { useLocation } from "wouter";
 
 type ActionType = "" | "buy" | "sell";
 
@@ -39,6 +40,8 @@ const GamePage = () => {
   const [holdings, setHoldings] = useState<Holding[]>([]);
   const [portfolio, setPortfolio] = useState<PortfolioItem[]>([]);
   const { pushHistories } = useHistory();
+
+  const [, navigate] = useLocation();
 
   const selectedStock = stocks.find((s) => s.id.toString() == selectedStockId);
   const selectedStockPrice =
@@ -128,18 +131,17 @@ const GamePage = () => {
       );
     }
 
-    const newHistories: HistoryStore[] = data.histories
-      .map((h) => {
-        const stockValue = h.holdings.reduce((acc, ho) => {
-          const stock = data.stocks.find((s) => s.id == ho.stockId);
-          return acc + (stock?.price ?? 0) * ho.count;
-        }, 0);
+    const newHistories: HistoryStore[] = data.histories.map((h) => {
+      const stockValue = h.holdings.reduce((acc, ho) => {
+        const stock = data.stocks.find((s) => s.id == ho.stockId);
+        return acc + (stock?.price ?? 0) * ho.count;
+      }, 0);
 
-        return {
-          ...h,
-          stockValue,
-        };
-      });
+      return {
+        ...h,
+        stockValue,
+      };
+    });
     pushHistories(newHistories);
 
     // SECTION: stocks related info
@@ -265,6 +267,10 @@ const GamePage = () => {
 
   const advanceDay = async () => {
     const newDay = day + 1;
+    if (newDay == 31) {
+      navigate("/result");
+      return;
+    }
     setDay(newDay);
     try {
       const res = await fetch(
@@ -399,7 +405,7 @@ const GamePage = () => {
                 variant={"subtle"}
                 onClick={advanceDay}
               >
-                進入下一天
+                {day == 30 ? "查看結果" : "進入下一天"}
               </Button>
             </ButtonGroup>
           </Flex>

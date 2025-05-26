@@ -7,10 +7,12 @@ type StockState = {
 
 type StockActions = {
   setStocks: (stocks: Stock[][]) => void;
+  clearStocks: () => void;
 };
 
 // all stocks of all players
 export const useStock = create<StockState & StockActions>((set) => ({
   stocks: [],
   setStocks: (stocks: Stock[][]) => set({ stocks }),
+  clearStocks: () => set({ stocks: [] }),
 }));

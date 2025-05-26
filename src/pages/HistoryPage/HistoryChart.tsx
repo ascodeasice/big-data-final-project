@@ -62,7 +62,7 @@ const HistoryChart = () => {
   const dataWithAverage = linearRegression(chartData, "總資產");
 
   return (
-    <ResponsiveContainer width="100%" height="100%">
+    <ResponsiveContainer width="100%" height="70%">
       <LineChart
         width={500}
         height={300}

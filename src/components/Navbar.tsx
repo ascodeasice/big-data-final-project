@@ -1,7 +1,7 @@
 import { Flex, Heading, Box, Button } from "@chakra-ui/react";
 import { Link } from "wouter";
 
-const Navbar = () => {
+const Navbar = ({ hideLinks = false }) => {
   return (
     <Flex
       spaceX={12}
@@ -17,7 +17,7 @@ const Navbar = () => {
           韭菜傳奇
         </Heading>
       </Link>
-      <Box>
+      <Box hidden={hideLinks}>
         <Link to="/game">
           <Button variant="plain" color="white">
             當日投資

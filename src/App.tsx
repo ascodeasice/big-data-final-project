@@ -3,6 +3,7 @@ import HomePage from "./pages/HomePage";
 import GamePage from "./pages/GamePage";
 import { Provider } from "@/components/ui/provider";
 import HistoryPage from "./pages/HistoryPage/HistoryPage";
+import ResultPage from "./pages/ResultPage";
 
 const App = () => (
   <Provider forcedTheme="light">
@@ -15,6 +16,9 @@ const App = () => (
       </Route>
       <Route path="/history">
         <HistoryPage />
+      </Route>
+      <Route path="/result">
+        <ResultPage/>
       </Route>
       {/* TODO: others, history */}
       {/* Default route in a switch */}

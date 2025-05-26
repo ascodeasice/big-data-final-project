@@ -11,6 +11,7 @@ type HistoryState = {
 
 type HistoryActions = {
   pushHistories: (newHistories: HistoryStore[]) => void;
+  clearHistories: () => void;
 };
 
 // all histories of all players
@@ -21,4 +22,5 @@ export const useHistory = create<HistoryState & HistoryActions>((set) => ({
       histories: [...state.histories, newHistories],
     }));
   },
+  clearHistories: () => set({ histories: [] }),
 }));
