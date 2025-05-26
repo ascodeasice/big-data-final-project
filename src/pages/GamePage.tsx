@@ -17,6 +17,7 @@ import {
 import camelcaseKeys from "camelcase-keys";
 import { useCallback, useEffect, useState } from "react";
 import { Toaster, toaster } from "@/components/ui/toaster";
+import { useHistory, type HistoryStore } from "@/stores/historyStore";
 
 type ActionType = "" | "buy" | "sell";
 
@@ -37,6 +38,7 @@ const GamePage = () => {
   const [stocks, setStocks] = useState<Stock[]>([]);
   const [holdings, setHoldings] = useState<Holding[]>([]);
   const [portfolio, setPortfolio] = useState<PortfolioItem[]>([]);
+  const { pushHistories } = useHistory();
 
   const selectedStock = stocks.find((s) => s.id.toString() == selectedStockId);
   const selectedStockPrice =
@@ -125,7 +127,20 @@ const GamePage = () => {
         ),
       );
     }
-    // TODO: update history of other players
+
+    const newHistories: HistoryStore[] = data.histories
+      .map((h) => {
+        const stockValue = h.holdings.reduce((acc, ho) => {
+          const stock = data.stocks.find((s) => s.id == ho.stockId);
+          return acc + (stock?.price ?? 0) * ho.count;
+        }, 0);
+
+        return {
+          ...h,
+          stockValue,
+        };
+      });
+    pushHistories(newHistories);
 
     // SECTION: stocks related info
     const sortedStocks = data.stocks.sort((a, b) =>
@@ -269,7 +284,7 @@ const GamePage = () => {
       );
       // deep must be used for userName inside histories
       const data: APIResponse = camelcaseKeys(await res.json(), { deep: true });
-      updateStates(data)
+      updateStates(data);
     } catch (error) {
       console.error(error);
     }
@@ -305,7 +320,6 @@ const GamePage = () => {
         <Navbar />
         <Flex paddingX={6} gap={6} direction={"column"}>
           <Flex gap={6}>
-            {/* TODO: update day count */}
             <Heading>第 {day} 天</Heading>
             <Heading>現金餘額：{formatCurrency(balance)}</Heading>
             <Heading>股票估值：{formatCurrency(holdingsWorth)}</Heading>
@@ -390,32 +404,34 @@ const GamePage = () => {
             </ButtonGroup>
           </Flex>
         </Flex>
-        {<Flex direction={"column"}>
-          <Heading>持有股票</Heading>
-          {/* TODO: extract into component */}
-          <Table.Root interactive stickyHeader variant={"outline"}>
-            <Table.Header>
-              <Table.Row>
-                <Table.ColumnHeader>名稱</Table.ColumnHeader>
-                <Table.ColumnHeader>股數</Table.ColumnHeader>
-              </Table.Row>
-            </Table.Header>
-            <Table.Body>
-              {/* TODO: sorting according to portfolio, holding, name */}
-              {/* use portfolio.map.sort instead */}
-              {holdings.map((h) => (
-                <Table.Row key={h.stockId}>
-                  <Table.Cell>{h.stockName}</Table.Cell>
-                  <Table.Cell>
-                    {h.count}
-                    {/* TODO: getHoldingText */}
-                    {getPortfolioText(h.stockId.toString())}
-                  </Table.Cell>
+        {
+          <Flex direction={"column"}>
+            <Heading>持有股票</Heading>
+            {/* TODO: extract into component */}
+            <Table.Root interactive stickyHeader variant={"outline"}>
+              <Table.Header>
+                <Table.Row>
+                  <Table.ColumnHeader>名稱</Table.ColumnHeader>
+                  <Table.ColumnHeader>股數</Table.ColumnHeader>
                 </Table.Row>
-              ))}
-            </Table.Body>
-          </Table.Root>
-        </Flex>}
+              </Table.Header>
+              <Table.Body>
+                {/* TODO: sorting according to portfolio, holding, name */}
+                {/* use portfolio.map.sort instead */}
+                {holdings.map((h) => (
+                  <Table.Row key={h.stockId}>
+                    <Table.Cell>{h.stockName}</Table.Cell>
+                    <Table.Cell>
+                      {h.count}
+                      {/* TODO: getHoldingText */}
+                      {getPortfolioText(h.stockId.toString())}
+                    </Table.Cell>
+                  </Table.Row>
+                ))}
+              </Table.Body>
+            </Table.Root>
+          </Flex>
+        }
       </Grid>
       <Toaster />
     </>

@@ -10,27 +10,24 @@ import {
   Label,
 } from "recharts";
 
-type ChartData = {
+import { useHistory } from "@/stores/historyStore";
+
+type RawChartData = {
   day: number;
   股票估值: number;
   現金餘額: number;
   總資產: number;
 };
 
-// TODO: use real data
-const data: ChartData[] = Array.from({ length: 30 }, (_, i) => {
-  const stockValue = Math.random() * 1000000;
-  const cash = Math.random() * 1000000;
+type ChartData = RawChartData & {
+  平均總資產: number;
+};
 
-  return {
-    day: i + 1,
-    股票估值: stockValue,
-    現金餘額: cash,
-    總資產: stockValue + cash,
-  };
-});
-
-function linearRegression(data: ChartData[], key: keyof ChartData) {
+// chat gpt generated
+function linearRegression(
+  data: RawChartData[],
+  key: keyof RawChartData,
+): ChartData[] {
   const n = data.length;
   const sumX = data.reduce((acc, _, i) => acc + i, 0);
   const sumY = data.reduce((acc, d) => acc + d[key], 0);
@@ -47,7 +44,23 @@ function linearRegression(data: ChartData[], key: keyof ChartData) {
 }
 
 const HistoryChart = () => {
-  const dataWithAverage = linearRegression(data, "總資產");
+  const { histories } = useHistory();
+  const myHistories = histories.map((hList) => {
+    const myHistory = hList.find((h) => h.userName == "player");
+    if (!myHistory) {
+      throw new Error(`player history not found`);
+    }
+    return myHistory;
+  });
+  const chartData = myHistories.map((h) => ({
+    day: h.day,
+    總資產: h.cash + h.stockValue,
+    股票估值: h.stockValue,
+    現金餘額: h.cash,
+  }));
+
+  const dataWithAverage = linearRegression(chartData, "總資產");
+
   return (
     <ResponsiveContainer width="100%" height="100%">
       <LineChart
