@@ -15,7 +15,7 @@ import {
   Text,
 } from "@chakra-ui/react";
 import camelcaseKeys from "camelcase-keys";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Toaster, toaster } from "@/components/ui/toaster";
 
 type ActionType = "" | "buy" | "sell";
@@ -31,7 +31,7 @@ const GamePage = () => {
   const [balance, setBalance] = useState(1_000_000);
   const [action, setAction] = useState<ActionType>("");
   const [bgGradient, setBgGradient] = useState<[string, string]>(["", ""]); // gradient from, to
-  const [day] = useState<number>(1);
+  const [day, setDay] = useState<number>(1);
   const [stockCount, setStockCount] = useState<number>(DEFAULT_STOCK_COUNT);
   const [selectedStockId, setSelectedStockId] = useState<string>("");
   const [stocks, setStocks] = useState<Stock[]>([]);
@@ -112,9 +112,33 @@ const GamePage = () => {
     }
   };
 
-  const fetchGameStatus = async () => {
-    // TODO: separate the case of start and advance since advance requires other parameters
-    const url = `${import.meta.env.VITE_BACKEND_URL}/${day == 1 ? "start" : `/advance/day`}`;
+  const updateStates = (data: APIResponse) => {
+    // update history status
+    const myHistory = data.histories.find((h) => h.userName == "player");
+    if (!myHistory) {
+      console.warn("My history not found");
+    } else {
+      setBalance(myHistory.cash);
+      setHoldings(
+        myHistory.holdings.sort((a, b) =>
+          a.stockName.localeCompare(b.stockName),
+        ),
+      );
+    }
+    // TODO: update history of other players
+
+    // SECTION: stocks related info
+    const sortedStocks = data.stocks.sort((a, b) =>
+      a.name.localeCompare(b.name),
+    );
+    setStocks(sortedStocks);
+
+    // init portfolio
+    setPortfolio(getDefaultPortfolio(sortedStocks));
+  };
+
+  const fetchGameStatus = useCallback(async () => {
+    const url = `${import.meta.env.VITE_BACKEND_URL}/start`;
     try {
       const res = await fetch(url);
       if (!res.ok) {
@@ -122,33 +146,11 @@ const GamePage = () => {
       }
       // deep must be used for userName inside histories
       const data: APIResponse = camelcaseKeys(await res.json(), { deep: true });
-
-      // update history status
-      const myHistory = data.histories.find((h) => h.userName == "player");
-      if (!myHistory) {
-        console.warn("My history not found");
-      } else {
-        setBalance(myHistory.cash);
-        setHoldings(
-          myHistory.holdings.sort((a, b) =>
-            a.stockName.localeCompare(b.stockName),
-          ),
-        );
-      }
-      // TODO: update history of other players
-
-      // SECTION: stocks related info
-      const sortedStocks = data.stocks.sort((a, b) =>
-        a.name.localeCompare(b.name),
-      );
-      setStocks(sortedStocks);
-
-      // init portfolio
-      setPortfolio(getDefaultPortfolio(sortedStocks));
+      updateStates(data);
     } catch (error) {
       console.error(error);
     }
-  };
+  }, []);
 
   const resetPortfolio = () => {
     setSelectedStockId("");
@@ -246,9 +248,37 @@ const GamePage = () => {
     }
   };
 
+  const advanceDay = async () => {
+    const newDay = day + 1;
+    setDay(newDay);
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/advance/${newDay}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            stocks: portfolio.map((p) => ({
+              id: Number(p.stockId),
+              count: p.count,
+            })),
+          }),
+        },
+      );
+      // deep must be used for userName inside histories
+      const data: APIResponse = camelcaseKeys(await res.json(), { deep: true });
+      updateStates(data)
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  // fetch game status when day changed
   useEffect(() => {
     fetchGameStatus();
-  }, []);
+  }, [fetchGameStatus]);
 
   // change gradient according to action change
   useEffect(() => {
@@ -349,6 +379,15 @@ const GamePage = () => {
                 重置投資組合
               </Button>
             </ButtonGroup>
+            <ButtonGroup>
+              <Button
+                colorPalette={"green"}
+                variant={"subtle"}
+                onClick={advanceDay}
+              >
+                進入下一天
+              </Button>
+            </ButtonGroup>
           </Flex>
         </Flex>
         <Flex direction={"column"}>
@@ -362,11 +401,14 @@ const GamePage = () => {
               </Table.Row>
             </Table.Header>
             <Table.Body>
+              {/* TODO: sorting according to portfolio, holding, name */}
+              {/* use portfolio.map.sort instead */}
               {holdings.map((h) => (
                 <Table.Row key={h.stockId}>
                   <Table.Cell>{h.stockName}</Table.Cell>
                   <Table.Cell>
                     {h.count}
+                    {/* TODO: getHoldingText */}
                     {getPortfolioText(h.stockId.toString())}
                   </Table.Cell>
                 </Table.Row>
