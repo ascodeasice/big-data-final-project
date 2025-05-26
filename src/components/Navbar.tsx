@@ -25,7 +25,7 @@ const Navbar = () => {
         </Link>
 
         <Link to="/history">
-          <Button variant="plain" color="white" disabled>
+          <Button variant="plain" color="white">
             投資歷史
           </Button>
         </Link>

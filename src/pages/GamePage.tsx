@@ -390,7 +390,7 @@ const GamePage = () => {
             </ButtonGroup>
           </Flex>
         </Flex>
-        <Flex direction={"column"}>
+        {<Flex direction={"column"}>
           <Heading>持有股票</Heading>
           {/* TODO: extract into component */}
           <Table.Root interactive stickyHeader variant={"outline"}>
@@ -415,7 +415,7 @@ const GamePage = () => {
               ))}
             </Table.Body>
           </Table.Root>
-        </Flex>
+        </Flex>}
       </Grid>
       <Toaster />
     </>
