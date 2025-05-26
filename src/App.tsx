@@ -1,6 +1,6 @@
 import { Route, Switch } from "wouter";
 import HomePage from "./pages/HomePage";
-import GamePage from "./pages/GamePage";
+import GamePage from "./pages/GamePage/GamePage";
 import { Provider } from "@/components/ui/provider";
 import HistoryPage from "./pages/HistoryPage/HistoryPage";
 import ResultPage from "./pages/ResultPage";

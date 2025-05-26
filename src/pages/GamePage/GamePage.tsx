@@ -1,7 +1,12 @@
 import Navbar from "@/components/Navbar";
 import { Field } from "@/components/ui/field";
 import { formatCurrency } from "@/functions/currency";
-import { type Stock, type APIResponse, type Holding } from "@/types/stockTypes";
+import {
+  type Stock,
+  type APIResponse,
+  type Holding,
+  type PortfolioItem,
+} from "@/types/stockTypes";
 import {
   Button,
   ButtonGroup,
@@ -11,7 +16,6 @@ import {
   InputGroup,
   NativeSelect,
   NumberInput,
-  Table,
   Text,
 } from "@chakra-ui/react";
 import camelcaseKeys from "camelcase-keys";
@@ -19,13 +23,9 @@ import { useCallback, useEffect, useState } from "react";
 import { Toaster, toaster } from "@/components/ui/toaster";
 import { useHistory, type HistoryStore } from "@/stores/historyStore";
 import { useLocation } from "wouter";
+import HoldingList from "./HoldingList";
 
 type ActionType = "" | "buy" | "sell";
-
-type PortfolioItem = {
-  stockId: string;
-  count: number; // positive: buying, negative: selling
-};
 
 const GamePage = () => {
   const DEFAULT_STOCK_COUNT = 1000;
@@ -247,24 +247,6 @@ const GamePage = () => {
     );
   };
 
-  const getPortfolioText = (stockId: string) => {
-    const item = portfolio.find((item) => item.stockId == stockId);
-    if (!item) {
-      console.warn(`portfolio item not found for id ${stockId}`);
-      return "";
-    }
-
-    const { count } = item;
-    if (count == 0) {
-      return "";
-    } else if (count > 0) {
-      return ` + ${count}`;
-    } else {
-      // keep the spaces standardized
-      return ` - ${Math.abs(count)}`;
-    }
-  };
-
   const advanceDay = async () => {
     const newDay = day + 1;
     if (newDay == 31) {
@@ -410,34 +392,7 @@ const GamePage = () => {
             </ButtonGroup>
           </Flex>
         </Flex>
-        {
-          <Flex direction={"column"}>
-            <Heading>持有股票</Heading>
-            {/* TODO: extract into component */}
-            <Table.Root interactive stickyHeader variant={"outline"}>
-              <Table.Header>
-                <Table.Row>
-                  <Table.ColumnHeader>名稱</Table.ColumnHeader>
-                  <Table.ColumnHeader>股數</Table.ColumnHeader>
-                </Table.Row>
-              </Table.Header>
-              <Table.Body>
-                {/* TODO: sorting according to portfolio, holding, name */}
-                {/* use portfolio.map.sort instead */}
-                {holdings.map((h) => (
-                  <Table.Row key={h.stockId}>
-                    <Table.Cell>{h.stockName}</Table.Cell>
-                    <Table.Cell>
-                      {h.count}
-                      {/* TODO: getHoldingText */}
-                      {getPortfolioText(h.stockId.toString())}
-                    </Table.Cell>
-                  </Table.Row>
-                ))}
-              </Table.Body>
-            </Table.Root>
-          </Flex>
-        }
+        <HoldingList holdings={holdings} portfolio={portfolio} />
       </Grid>
       <Toaster />
     </>

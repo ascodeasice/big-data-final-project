@@ -23,3 +23,8 @@ export type APIResponse = {
   stocks: Stock[];
   histories: History[];
 };
+
+export type PortfolioItem = {
+  stockId: string;
+  count: number; // positive: buying, negative: selling
+};
