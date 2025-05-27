@@ -3,7 +3,11 @@ import { useHistory } from "@/stores/historyStore";
 import { Table } from "@chakra-ui/react";
 import { v4 } from "uuid";
 
-const LeaderboardPage = () => {
+type Props = {
+  gridColumn?: string;
+};
+
+const LeaderboardPage = ({ gridColumn = "1/-1" }: Props) => {
   const { histories } = useHistory();
 
   const historiesLastDay = histories[histories.length - 1];
@@ -13,7 +17,7 @@ const LeaderboardPage = () => {
       interactive
       stickyHeader
       variant={"outline"}
-      gridColumn={"1/-1"}
+      gridColumn={gridColumn}
       width={"50%"}
       justifySelf={"center"}
     >
