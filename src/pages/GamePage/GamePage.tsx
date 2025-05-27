@@ -25,6 +25,7 @@ import { useHistory, type HistoryStore } from "@/stores/historyStore";
 import { useLocation } from "wouter";
 import HoldingList from "./HoldingList";
 import HistoryPage from "../HistoryPage/HistoryPage";
+import LeaderboardPage from "../LeaderboardPage/LeaderboardPage";
 
 type ActionType = "" | "buy" | "sell";
 
@@ -297,7 +298,6 @@ const GamePage = () => {
     }
   }, [action]);
 
-  // NOTE: using a tab system to prevent re-rendering, losing game info
   return (
     <>
       <Grid
@@ -310,6 +310,7 @@ const GamePage = () => {
         gradientTo={bgGradient[1]}
       >
         <Navbar setTabIndex={setTabIndex} />
+        {/* NOTE: using a tab system to prevent re-rendering, losing game info */}
         {tabIndex == 0 ? (
           <>
             <Flex paddingX={6} gap={6} direction={"column"}>
@@ -402,8 +403,10 @@ const GamePage = () => {
             </Flex>
             <HoldingList holdings={holdings} portfolio={portfolio} />
           </>
+        ) : tabIndex == 1 ? (
+          <HistoryPage />
         ) : (
-          <HistoryPage/>
+          <LeaderboardPage/>
         )}
       </Grid>
       <Toaster />

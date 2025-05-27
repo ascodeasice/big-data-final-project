@@ -11,9 +11,9 @@ const ResultPage = () => {
   const { clearStocks } = useStock();
 
   const restartGame = () => {
-    clearHistories()
-    clearStocks()
-    navigate("/")
+    clearHistories();
+    clearStocks();
+    navigate("/");
   };
 
   return (
