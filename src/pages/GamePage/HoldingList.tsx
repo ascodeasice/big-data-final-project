@@ -27,29 +27,31 @@ const HoldingList = ({ holdings, portfolio }: Params) => {
   return (
     <Flex direction={"column"}>
       <Heading>持有股票</Heading>
-      {/* TODO: extract into component */}
-      <Table.Root interactive stickyHeader variant={"outline"}>
-        <Table.Header>
-          <Table.Row>
-            <Table.ColumnHeader>名稱</Table.ColumnHeader>
-            <Table.ColumnHeader>股數</Table.ColumnHeader>
-          </Table.Row>
-        </Table.Header>
-        <Table.Body>
-          {/* TODO: sorting according to portfolio, holding, name */}
-          {/* use portfolio.map.sort instead */}
-          {holdings.map((h) => (
-            <Table.Row key={h.stockId}>
-              <Table.Cell>{h.stockName}</Table.Cell>
-              <Table.Cell>
-                {h.count}
-                {/* TODO: getHoldingText */}
-                {getPortfolioText(h.stockId.toString())}
-              </Table.Cell>
+      <Table.ScrollArea borderWidth="1px" rounded="md" height="75vh">
+        {/* changing the variant somehow makes the stickyHeader not working */}
+        <Table.Root interactive stickyHeader>
+          <Table.Header>
+            <Table.Row bg='bg.subtle'>
+              <Table.ColumnHeader>名稱</Table.ColumnHeader>
+              <Table.ColumnHeader>股數</Table.ColumnHeader>
             </Table.Row>
-          ))}
-        </Table.Body>
-      </Table.Root>
+          </Table.Header>
+          <Table.Body>
+            {/* TODO: sorting according to portfolio, holding, name */}
+            {/* use portfolio.map.sort instead */}
+            {holdings.map((h) => (
+              <Table.Row key={h.stockId}>
+                <Table.Cell>{h.stockName}</Table.Cell>
+                <Table.Cell>
+                  {h.count}
+                  {/* TODO: getHoldingText */}
+                  {getPortfolioText(h.stockId.toString())}
+                </Table.Cell>
+              </Table.Row>
+            ))}
+          </Table.Body>
+        </Table.Root>
+      </Table.ScrollArea>
     </Flex>
   );
 };
