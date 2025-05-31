@@ -42,6 +42,7 @@ const GamePage = () => {
   const [holdings, setHoldings] = useState<Holding[]>([]);
   const [portfolio, setPortfolio] = useState<PortfolioItem[]>([]);
   const [tabIndex, setTabIndex] = useState(0);
+  const [nextDayLoading, setNextDayLoading] = useState(false)
 
   const { pushHistories } = useHistory();
 
@@ -259,6 +260,7 @@ const GamePage = () => {
     }
     setDay(newDay);
     try {
+      setNextDayLoading(true)
       const res = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/advance/${newDay}`,
         {
@@ -277,8 +279,10 @@ const GamePage = () => {
       // deep must be used for userName inside histories
       const data: APIResponse = camelcaseKeys(await res.json(), { deep: true });
       updateStates(data);
+      setNextDayLoading(false)
     } catch (error) {
       console.error(error);
+      setNextDayLoading(false)
     }
   };
 
@@ -395,6 +399,7 @@ const GamePage = () => {
                     colorPalette={"green"}
                     variant={"subtle"}
                     onClick={advanceDay}
+                    loading={nextDayLoading}
                   >
                     {day == 30 ? "查看結果" : "進入下一天"}
                   </Button>
