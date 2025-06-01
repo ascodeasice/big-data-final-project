@@ -95,7 +95,7 @@ const HistoryChart = () => {
           type="linear"
           dataKey="平均總資產"
           stroke="#000000"
-          strokeDasharray="5 5"
+          dot={false}
         />
       </LineChart>
     </ResponsiveContainer>

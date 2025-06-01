@@ -32,7 +32,7 @@ type ActionType = "" | "buy" | "sell";
 const GamePage = () => {
   const DEFAULT_STOCK_COUNT = 1000;
 
-  const [balance, setBalance] = useState(1_000_000);
+  const [balance, setBalance] = useState(5_000_000);
   const [action, setAction] = useState<ActionType>("");
   const [bgGradient, setBgGradient] = useState<[string, string]>(["", ""]); // gradient from, to
   const [day, setDay] = useState<number>(1);
